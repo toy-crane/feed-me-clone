@@ -11,6 +11,9 @@ import {
 } from "@/components/ui/input-group";
 import { Spinner } from "@/components/ui/spinner";
 import { Field, FieldDescription } from "@/components/ui/field";
+import { isValidHttpUrl } from "@/lib/core/url";
+
+const VALIDATION_HINT = "올바른 URL을 입력해 주세요";
 
 type UrlInputProps = {
   onSubmit: (url: string) => void;
@@ -24,25 +27,39 @@ export function UrlInput({
   initialValue = "",
 }: UrlInputProps) {
   const [value, setValue] = useState(initialValue);
+  const [showHint, setShowHint] = useState(false);
+
+  const trimmed = value.trim();
+  const isEmpty = trimmed.length === 0;
+  const submitDisabled = isLoading || isEmpty;
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (isLoading) return;
+    if (!isValidHttpUrl(value)) {
+      setShowHint(true);
+      return;
+    }
+    setShowHint(false);
     onSubmit(value);
   }
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <Field>
+      <Field data-invalid={showHint || undefined}>
         <InputGroup>
           <InputGroupInput
             type="url"
             inputMode="url"
             autoComplete="off"
             aria-label="URL"
+            aria-invalid={showHint || undefined}
             placeholder="https://..."
             value={value}
-            onChange={(event) => setValue(event.target.value)}
+            onChange={(event) => {
+              setValue(event.target.value);
+              if (showHint) setShowHint(false);
+            }}
             disabled={isLoading}
           />
           <InputGroupAddon align="inline-end">
@@ -51,7 +68,7 @@ export function UrlInput({
               size="icon-sm"
               variant="default"
               aria-label="변환"
-              disabled={isLoading}
+              disabled={submitDisabled}
             >
               {isLoading ? (
                 <Spinner aria-label="변환 중" />
@@ -61,9 +78,11 @@ export function UrlInput({
             </Button>
           </InputGroupAddon>
         </InputGroup>
-        <FieldDescription className="sr-only">
-          URL을 입력하고 화살표를 누르세요
-        </FieldDescription>
+        {showHint ? (
+          <FieldDescription className="text-destructive">
+            {VALIDATION_HINT}
+          </FieldDescription>
+        ) : null}
       </Field>
     </form>
   );
