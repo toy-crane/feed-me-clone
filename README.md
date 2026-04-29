@@ -89,8 +89,8 @@ spec.md와 wireframe을 참조해 구현 계획을 수립합니다. vertical sli
 
 ### 5. Build (`/execute-plan`)
 
-Team Lead로서 plan.md의 Task를 한 번에 하나씩 직접 구현합니다. TDD (RED → GREEN) 규율을 따르고, Task당 conventional commit 하나를 만듭니다. 완료 후 사용자에게 spec.md 대비 검증을 요청하며, 판단은 `artifacts/<feature>/decisions.md`에 Harness Signal과 함께 기록합니다.
+plan.md의 Task를 메인 컨텍스트에서 한 번에 하나씩 직접 구현합니다. TDD (RED → GREEN) 규율을 따르고, Task당 conventional commit 하나를 만듭니다. 독립 검증은 `code-reviewer` sub-agent에 위임하고, 완료 후 사용자에게 spec.md 대비 검증을 요청합니다. 판단은 `artifacts/<feature>/learnings.md`에 기록해 다음 feature를 더 쉽게 만듭니다.
 
 ### 6. Compound (`/compound`)
 
-`decisions.md`에 누적된 판단을 읽어 반복된 패턴을 감지하고, Skill/Hook/Rule/CLAUDE.md로 승격할 후보를 제안합니다. 사용자 승인(Ask-first) 후에만 적용합니다.
+여러 feature의 `learnings.md`에 누적된 약한 신호를 패턴으로 묶어 Skill/Hook/Rule/CLAUDE.md로 승격할 후보를 제안합니다. 사용자 승인(Ask-first) 후에만 적용합니다.
