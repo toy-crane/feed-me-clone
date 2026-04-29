@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { UrlInput } from "./UrlInput";
 import { ResultView } from "./ResultView";
 import { PromptPanel } from "./PromptPanel";
+import { ExportSplitButton } from "./ExportSplitButton";
 
 export function Converter() {
   const [isLoading, setIsLoading] = useState(false);
@@ -56,6 +57,13 @@ export function Converter() {
       {result && !hasError ? (
         <ResultView
           result={result}
+          exportSlot={
+            <ExportSplitButton
+              markdown={result.markdown}
+              prompt={prompt}
+              title={result.title}
+            />
+          }
           promptSlot={<PromptPanel value={prompt} onChange={setPrompt} />}
         />
       ) : null}
