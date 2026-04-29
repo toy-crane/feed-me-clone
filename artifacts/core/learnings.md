@@ -59,7 +59,7 @@ applied: not-yet
 ## userEvent.setup() + 직접 조작한 navigator.clipboard 충돌
 
 **상황**: T5 ExportSplitButton 테스트에서 `userEvent.setup()`을 쓰면서 동시에 `Object.defineProperty(navigator, "clipboard", { value: { writeText } })`를 했더니 클릭이 writeText를 호출하지 않음. user-event v14가 자체 clipboard polyfill을 설치해 mock과 충돌.
-**판단**: 클립보드 mock이 필요한 테스트는 `fireEvent.click`을 쓰는 게 안전. user-event는 `setup({ writeToClipboard: false })` 옵션이 있지만 동작이 일관되지 않았다.
-**다시 마주칠 가능성**: 중간 — 다음에 클립보드 테스트할 때 같은 함정.
+**판단**: 클립보드 mock이 필요한 테스트는 `fireEvent.click`을 쓰는 게 안전. user-event v14 `setup()`은 호출 직후 `navigator.clipboard.writeText`를 자체 polyfill로 덮어쓴다. 디버그로 `navigator.clipboard.writeText === writeText? false`를 발견. 회피책은 (a) fireEvent로 트리거, (b) userEvent.setup() 직후 clipboard mock 재주입.
+**다시 마주칠 가능성**: 높음 — 클립보드를 쓰는 모든 컴포넌트 테스트.
 
 
