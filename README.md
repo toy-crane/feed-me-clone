@@ -1,6 +1,6 @@
 # Harness Engineering Template
 
-Next.js 16 + React 19 프로젝트 템플릿
+Next.js 16 + React 19로 빠르게 시작하는 프로젝트 템플릿
 
 ## 기술 스택
 
