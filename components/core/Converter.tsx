@@ -10,11 +10,13 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { UrlInput } from "./UrlInput";
 import { ResultView } from "./ResultView";
+import { PromptPanel } from "./PromptPanel";
 
 export function Converter() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<ConversionResult | null>(null);
   const [hasError, setHasError] = useState(false);
+  const [prompt, setPrompt] = useState("");
 
   async function handleSubmit(url: string) {
     setIsLoading(true);
@@ -51,7 +53,12 @@ export function Converter() {
           <AlertDescription>{GENERIC_CONVERSION_ERROR_MESSAGE}</AlertDescription>
         </Alert>
       ) : null}
-      {result && !hasError ? <ResultView result={result} /> : null}
+      {result && !hasError ? (
+        <ResultView
+          result={result}
+          promptSlot={<PromptPanel value={prompt} onChange={setPrompt} />}
+        />
+      ) : null}
     </div>
   );
 }
