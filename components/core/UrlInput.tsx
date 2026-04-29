@@ -57,9 +57,10 @@ export function UrlInput({
             type="url"
             inputMode="url"
             autoComplete="off"
+            spellCheck={false}
             aria-label="URL"
             aria-invalid={showHint || undefined}
-            placeholder="https://..."
+            placeholder="https://…"
             value={value}
             onChange={(event) => {
               setValue(event.target.value);

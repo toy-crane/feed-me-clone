@@ -80,7 +80,7 @@ describe("ResultView", () => {
 
     const promptSlot = screen.getByTestId("prompt-slot");
     const headerTitle = screen.getByRole("heading", { level: 1, name: "Article" });
-    const bodySection = screen.getByRole("heading", { level: 2, name: "Section" });
+    const bodySection = screen.getByRole("heading", { level: 3, name: "Section" });
 
     const order = headerTitle.compareDocumentPosition(promptSlot);
     expect(order & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -101,7 +101,7 @@ describe("ResultView", () => {
     );
 
     expect(
-      screen.getByRole("heading", { level: 2, name: "Section" })
+      screen.getByRole("heading", { level: 3, name: "Section" })
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "link" })).toHaveAttribute(
       "href",
