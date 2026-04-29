@@ -62,4 +62,54 @@ applied: not-yet
 **판단**: 클립보드 mock이 필요한 테스트는 `fireEvent.click`을 쓰는 게 안전. user-event v14 `setup()`은 호출 직후 `navigator.clipboard.writeText`를 자체 polyfill로 덮어쓴다. 디버그로 `navigator.clipboard.writeText === writeText? false`를 발견. 회피책은 (a) fireEvent로 트리거, (b) userEvent.setup() 직후 clipboard mock 재주입.
 **다시 마주칠 가능성**: 높음 — 클립보드를 쓰는 모든 컴포넌트 테스트.
 
+---
+category: code-review
+applied: rule
+---
+## SSRF 방어를 fetching service의 기본 구성으로 승격
+
+**상황**: code-reviewer가 SSRF(C1)를 Critical로 지적. 서버에서 user-supplied URL을 fetch하는 모든 service는 (a) URL 형식 검증 (b) hostname 차단 (loopback/private/link-local) (c) DNS resolve 후 IP 재검사 (rebinding 방어)의 3계층이 필요하다.
+**판단**: `lib/core/url.ts`의 `isPrivateHostname` + `lib/core/dns-resolver.ts`의 `resolveHost`로 분리해 service에서 결합. **즉시 승격 candidate**: 다음 user-supplied URL을 fetch하는 feature가 등장하면 같은 패턴을 재사용해야 한다. CLAUDE.md 또는 새 `.claude/rules/server-fetch-ssrf-defense.md`로 올릴 가치가 있음.
+**다시 마주칠 가능성**: 높음 — webhook ingest, OG/preview 추출, RSS 변환 등 모든 패턴.
+
+---
+category: code-review
+applied: rule
+---
+## 외부 라이브러리 동기 파싱 단계는 AbortSignal로 중단되지 않는다
+
+**상황**: code-reviewer C2 — `services/convert.ts`에서 `fetch(... signal)` 만으로는 `extractMarkdown`(JSDOM + Defuddle 동기 작업)이 5초 안에 끝나지 않을 수 있음. 5초 timeout invariant가 부분적으로만 강제됨.
+**판단**: `Promise.race(extractMarkdown(...), abortRejection())` 패턴으로 동기 파싱 단계도 timeout으로 강제 종료. 테스트는 `mockImplementation(() => new Promise(() => {}))`로 hang 시뮬레이션 후 `vi.advanceTimersByTimeAsync(5000)`로 timer fire → reject 확인.
+**다시 마주칠 가능성**: 높음 — 외부 파서/렌더러 동기 작업이 들어가는 서버 함수마다 같은 함정.
+
+---
+category: code-review
+applied: rule
+---
+## Service에서 외부 응답 본문은 byte cap으로 읽는다
+
+**상황**: C3 — `await response.text()`는 무제한 메모리 사용. 5초 안에 다 받아도 GB 단위 응답이면 Node 힙 폭발. JSDOM이 추가로 같은 양을 복제해 더 위험.
+**판단**: `Content-Length` 사전 체크 + 스트림 ReaderWithCap (10 MB 한도). 한도 초과 시 reader.cancel() 후 throw.
+**다시 마주칠 가능성**: 높음 — 외부 fetch 모든 곳에서 같은 가드가 필요.
+
+---
+category: code-review
+applied: rule
+---
+## 새 탭 + clipboard write는 popup-blocker 안전 순서를 지킨다
+
+**상황**: I2 — `await navigator.clipboard.writeText(...)` 뒤에 `window.open(...)`을 두면 user-gesture frame이 끊겨 Safari/strict Firefox에서 popup이 차단됨.
+**판단**: `window.open(target, "_blank", "noopener,noreferrer")`을 동기 먼저 호출하고, 그 다음에 clipboard write를 await. 클립보드 실패 시 success toast 대신 error toast.
+**다시 마주칠 가능성**: 중간 — LLM/외부 사이트로 핸드오프하는 패턴이 추가될 때마다.
+
+---
+category: spec-ambiguity
+applied: discarded
+---
+## 빈 title 렌더링 fallback은 spec이 명시적으로 보류
+
+**상황**: I4 — code-reviewer가 ResultView가 `title=""`일 때 빈 `<h1>`을 렌더한다고 지적. spec data model 주석에는 `title: string (required) — 비어 있을 수 있음(빈 문자열 그대로 전달; 다운로드 단계에서 fallback 적용)`로 명시.
+**판단**: spec이 "다운로드 단계에서 fallback"을 명시했고 표시 단계에는 fallback을 요구하지 않음. `lib/core/download-md.ts`의 `buildFilename`이 이미 fallback을 적용함. ResultView에서 fallback을 추가하는 건 spec 범위 밖이므로 reject. 사용자 검수 단계에서 실 사이트로 빈 제목이 자주 발생하는지 확인 후 follow-up feature.
+**다시 마주칠 가능성**: 낮음 — feature 특유 결정.
+
 
