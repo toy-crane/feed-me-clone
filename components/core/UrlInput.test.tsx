@@ -111,3 +111,60 @@ describe("UrlInput — invalid URL handling", () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 });
+
+describe("UrlInput — clear (X) icon", () => {
+  it("does not show the clear icon while the input is empty", () => {
+    render(<UrlInput onSubmit={vi.fn()} isLoading={false} />);
+    expect(
+      screen.queryByRole("button", { name: /입력 지우기/ })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the clear icon once the input has any value", async () => {
+    const user = userEvent.setup();
+    render(<UrlInput onSubmit={vi.fn()} isLoading={false} />);
+    await user.type(
+      screen.getByRole("textbox", { name: /url/i }),
+      "https://example.com"
+    );
+    expect(
+      screen.getByRole("button", { name: /입력 지우기/ })
+    ).toBeInTheDocument();
+  });
+
+  it("clears the input value when the clear icon is clicked", async () => {
+    const user = userEvent.setup();
+    render(
+      <UrlInput
+        onSubmit={vi.fn()}
+        isLoading={false}
+        initialValue="https://example.com"
+      />
+    );
+    const input = screen.getByRole("textbox", { name: /url/i });
+    expect(input).toHaveValue("https://example.com");
+
+    await user.click(screen.getByRole("button", { name: /입력 지우기/ }));
+
+    expect(input).toHaveValue("");
+    expect(
+      screen.queryByRole("button", { name: /입력 지우기/ })
+    ).not.toBeInTheDocument();
+  });
+
+  it("does NOT call onSubmit when the clear icon is clicked", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(
+      <UrlInput
+        onSubmit={onSubmit}
+        isLoading={false}
+        initialValue="https://example.com"
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: /입력 지우기/ }));
+
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+});

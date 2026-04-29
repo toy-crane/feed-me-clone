@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { ArrowRightIcon } from "lucide-react";
+import { ArrowRightIcon, XIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -44,6 +44,11 @@ export function UrlInput({
     onSubmit(value);
   }
 
+  function handleClear() {
+    setValue("");
+    setShowHint(false);
+  }
+
   return (
     <form onSubmit={handleSubmit} noValidate>
       <Field data-invalid={showHint || undefined}>
@@ -63,6 +68,18 @@ export function UrlInput({
             disabled={isLoading}
           />
           <InputGroupAddon align="inline-end">
+            {value.length > 0 ? (
+              <Button
+                type="button"
+                size="icon-xs"
+                variant="ghost"
+                aria-label="입력 지우기"
+                onClick={handleClear}
+                disabled={isLoading}
+              >
+                <XIcon />
+              </Button>
+            ) : null}
             <Button
               type="submit"
               size="icon-sm"

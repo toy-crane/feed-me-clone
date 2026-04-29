@@ -126,4 +126,29 @@ describe("Converter — error path", () => {
     await screen.findByRole("heading", { level: 1, name: "Hello" });
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
+
+  it("preserves the result and prompt state when the clear (X) icon is clicked", async () => {
+    const user = userEvent.setup();
+    mockFetchOk(successPayload);
+
+    render(<Converter />);
+    const input = screen.getByRole("textbox", { name: /url/i });
+    await user.type(input, "https://example.com/post{Enter}");
+    await screen.findByRole("heading", { level: 1, name: "Hello" });
+
+    await user.click(screen.getByRole("button", { name: /프롬프트 추가하기/ }));
+    const textarea = screen.getByPlaceholderText("ex) 이 글을 요약해줘");
+    await user.type(textarea, "save me");
+    expect(textarea).toHaveValue("save me");
+
+    await user.click(screen.getByRole("button", { name: /입력 지우기/ }));
+
+    expect(input).toHaveValue("");
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Hello" })
+    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("ex) 이 글을 요약해줘")).toHaveValue(
+      "save me"
+    );
+  });
 });
