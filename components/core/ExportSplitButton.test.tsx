@@ -1,9 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 
-vi.mock("sonner", () => ({
-  toast: vi.fn(),
-}));
+vi.mock("sonner", () => {
+  const t = vi.fn() as unknown as ((m: string) => void) & {
+    error: ReturnType<typeof vi.fn>;
+  };
+  t.error = vi.fn();
+  return { toast: t };
+});
 
 vi.mock("@/lib/core/download-md", () => ({
   downloadMarkdown: vi.fn(),
@@ -29,6 +33,7 @@ beforeEach(() => {
   writeText.mockReset();
   writeText.mockResolvedValue(undefined);
   mockedToast.mockReset();
+  (mockedToast as unknown as { error: ReturnType<typeof vi.fn> }).error.mockReset();
   mockedDownload.mockReset();
   windowOpen.mockReset();
   window.open = windowOpen as unknown as typeof window.open;
@@ -80,6 +85,23 @@ describe("ExportSplitButton — copy", () => {
 
     expect(mockedToast).toHaveBeenCalledTimes(1);
     expect(mockedToast.mock.calls[0][0]).toBe("복사됨");
+  });
+
+  it("shows an error toast (not '복사됨') when clipboard write rejects", async () => {
+    writeText.mockRejectedValueOnce(new Error("denied"));
+    render(<ExportSplitButton markdown="body" prompt="" title="x" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "복사하기" }));
+    await flush();
+
+    const errorMock = (mockedToast as unknown as {
+      error: ReturnType<typeof vi.fn>;
+    }).error;
+    expect(errorMock).toHaveBeenCalledWith("클립보드 복사에 실패했어요");
+    const successCalls = mockedToast.mock.calls.filter(
+      ([first]) => first === "복사됨"
+    );
+    expect(successCalls).toHaveLength(0);
   });
 });
 
@@ -152,6 +174,49 @@ describe("ExportSplitButton — export menu", () => {
     await flush();
 
     expect(writeText).toHaveBeenCalledWith("존댓말로 풀어줘\n\nBODY");
+  });
+
+  it("opens the LLM tab synchronously BEFORE awaiting the clipboard write (popup-blocker safe)", async () => {
+    render(<ExportSplitButton markdown="BODY" prompt="" title="x" />);
+
+    let popupOpenedAt = -1;
+    let writeCalledAt = -1;
+    let counter = 0;
+    windowOpen.mockImplementation(() => {
+      popupOpenedAt = ++counter;
+      return null;
+    });
+    writeText.mockImplementation(async () => {
+      writeCalledAt = ++counter;
+    });
+
+    const menu = await openMenu();
+    fireEvent.click(menu.getByRole("menuitem", { name: "ChatGPT에서 열기" }));
+    await flush();
+
+    expect(popupOpenedAt).toBeGreaterThan(0);
+    expect(writeCalledAt).toBeGreaterThan(0);
+    expect(popupOpenedAt).toBeLessThan(writeCalledAt);
+  });
+
+  it("shows an error toast (and no success toast) when clipboard write fails during handoff", async () => {
+    writeText.mockRejectedValueOnce(new Error("denied"));
+    render(<ExportSplitButton markdown="BODY" prompt="" title="x" />);
+
+    const menu = await openMenu();
+    fireEvent.click(menu.getByRole("menuitem", { name: "ChatGPT에서 열기" }));
+    await flush();
+    await flush();
+
+    const errorMock = (mockedToast as unknown as {
+      error: ReturnType<typeof vi.fn>;
+    }).error;
+    expect(errorMock).toHaveBeenCalledWith("클립보드 복사에 실패했어요");
+    const handoffToastCalls = mockedToast.mock.calls.filter(
+      ([first]) =>
+        typeof first === "string" && first.includes("클립보드에 복사했어요")
+    );
+    expect(handoffToastCalls).toHaveLength(0);
   });
 
   it("shows the LLM-handoff toast on every LLM menu click", async () => {
