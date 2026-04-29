@@ -22,6 +22,7 @@ import { downloadMarkdown } from "@/lib/core/download-md";
 const CHATGPT_URL = "https://chatgpt.com/";
 const CLAUDE_URL = "https://claude.ai/new";
 const HANDOFF_TOAST = "클립보드에 복사했어요. 입력창에 붙여넣어 주세요";
+const CLIPBOARD_ERROR_TOAST = "클립보드 복사에 실패했어요";
 
 type ExportSplitButtonProps = {
   markdown: string;
@@ -36,19 +37,27 @@ export function ExportSplitButton({
 }: ExportSplitButtonProps) {
   async function handleCopy() {
     const payload = composeClipboardPayload(prompt, markdown);
-    await navigator.clipboard.writeText(payload);
-    toast("복사됨");
+    try {
+      await navigator.clipboard.writeText(payload);
+      toast("복사됨");
+    } catch {
+      toast.error(CLIPBOARD_ERROR_TOAST);
+    }
   }
 
   function handleDownload() {
     downloadMarkdown(title, markdown);
   }
 
-  async function handleHandoff(target: typeof CHATGPT_URL | typeof CLAUDE_URL) {
-    const payload = composeClipboardPayload(prompt, markdown);
-    await navigator.clipboard.writeText(payload);
+  function handleHandoff(target: typeof CHATGPT_URL | typeof CLAUDE_URL) {
+    // Open the new tab synchronously to preserve the user-gesture frame
+    // (Safari/strict Firefox block popups created after an `await`).
     window.open(target, "_blank", "noopener,noreferrer");
-    toast(HANDOFF_TOAST);
+    const payload = composeClipboardPayload(prompt, markdown);
+    navigator.clipboard
+      .writeText(payload)
+      .then(() => toast(HANDOFF_TOAST))
+      .catch(() => toast.error(CLIPBOARD_ERROR_TOAST));
   }
 
   return (
