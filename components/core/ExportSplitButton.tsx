@@ -1,6 +1,11 @@
 "use client";
 
-import { ChevronDownIcon, CopyIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  CopyIcon,
+  DownloadIcon,
+  ExternalLinkIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -8,9 +13,15 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { composeClipboardPayload } from "@/lib/core/compose-clipboard";
+import { downloadMarkdown } from "@/lib/core/download-md";
+
+const CHATGPT_URL = "https://chatgpt.com/";
+const CLAUDE_URL = "https://claude.ai/new";
+const HANDOFF_TOAST = "클립보드에 복사했어요. 입력창에 붙여넣어 주세요";
 
 type ExportSplitButtonProps = {
   markdown: string;
@@ -21,11 +32,23 @@ type ExportSplitButtonProps = {
 export function ExportSplitButton({
   markdown,
   prompt,
+  title,
 }: ExportSplitButtonProps) {
   async function handleCopy() {
     const payload = composeClipboardPayload(prompt, markdown);
     await navigator.clipboard.writeText(payload);
     toast("복사됨");
+  }
+
+  function handleDownload() {
+    downloadMarkdown(title, markdown);
+  }
+
+  async function handleHandoff(target: typeof CHATGPT_URL | typeof CLAUDE_URL) {
+    const payload = composeClipboardPayload(prompt, markdown);
+    await navigator.clipboard.writeText(payload);
+    window.open(target, "_blank", "noopener,noreferrer");
+    toast(HANDOFF_TOAST);
   }
 
   return (
@@ -54,7 +77,20 @@ export function ExportSplitButton({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuGroup />
+          <DropdownMenuGroup>
+            <DropdownMenuItem onSelect={handleDownload}>
+              <DownloadIcon />
+              마크다운 다운로드
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleHandoff(CHATGPT_URL)}>
+              <ExternalLinkIcon />
+              ChatGPT에서 열기
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleHandoff(CLAUDE_URL)}>
+              <ExternalLinkIcon />
+              Claude에서 열기
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
