@@ -87,7 +87,7 @@
 
 ## Tasks
 
-### Task 1: 유효 URL → 변환 결과 헤더와 Markdown 본문 렌더링 (Scenario 1 happy path)
+### Task 1: 유효 URL → 변환 결과 헤더와 Markdown 본문 렌더링 (Scenario 1 happy path) ✅
 
 - **담당 시나리오**: Scenario 1 (full)
 - **크기**: M (~7 파일, 2 layer — service + UI)
@@ -127,7 +127,7 @@
 
 ---
 
-### Task 2: 잘못된 URL 형식 → 입력 단계 차단 (Scenario 2)
+### Task 2: 잘못된 URL 형식 → 입력 단계 차단 (Scenario 2) ✅
 
 - **담당 시나리오**: Scenario 2 (full)
 - **크기**: S (3 파일)
@@ -150,7 +150,7 @@
 
 ---
 
-### Task 3: 변환 실패 → 일반 실패 메시지 (Scenario 3)
+### Task 3: 변환 실패 → 일반 실패 메시지 (Scenario 3) ✅
 
 - **담당 시나리오**: Scenario 3 (full)
 - **크기**: S (3 파일)
@@ -182,7 +182,7 @@
 
 ---
 
-### Task 4: 프롬프트 영역 펼침·접기 + 프리셋 칩 (Scenarios 4, 5)
+### Task 4: 프롬프트 영역 펼침·접기 + 프리셋 칩 (Scenarios 4, 5) ✅
 
 - **담당 시나리오**: Scenario 4 (full), Scenario 5 (full)
 - **크기**: M (3 파일)
@@ -212,7 +212,7 @@
 
 ---
 
-### Task 5: 결과 복사 → 클립보드 + 토스트 (Scenario 6)
+### Task 5: 결과 복사 → 클립보드 + 토스트 (Scenario 6) ✅
 
 - **담당 시나리오**: Scenario 6 (full)
 - **크기**: M (5 파일 + 의존성 추가)
@@ -243,7 +243,7 @@
 
 ---
 
-### Task 6: 내보내기 메뉴 — `.md` 다운로드 + ChatGPT/Claude 열기 (Scenarios 7, 8)
+### Task 6: 내보내기 메뉴 — `.md` 다운로드 + ChatGPT/Claude 열기 (Scenarios 7, 8) ✅
 
 - **담당 시나리오**: Scenario 7 (full), Scenario 8 (full)
 - **크기**: M (4 파일)
@@ -275,7 +275,7 @@
 
 ---
 
-### Task 7: 입력 필드 X 아이콘으로 비우기 (Scenario 9)
+### Task 7: 입력 필드 X 아이콘으로 비우기 (Scenario 9) ✅
 
 - **담당 시나리오**: Scenario 9 (full)
 - **크기**: S (2 파일)
@@ -296,7 +296,7 @@
 
 ---
 
-### Task 8: 다크모드 토글 (Scenario 10)
+### Task 8: 다크모드 토글 (Scenario 10) ✅
 
 - **담당 시나리오**: Scenario 10 (full)
 - **크기**: S (2 파일 + layout 수정)
@@ -328,7 +328,7 @@
 
 ---
 
-### Task 9: 반응형·접근성 종합 검수 (불변 규칙: 반응형, 일반 접근성)
+### Task 9: 반응형·접근성 종합 검수 (불변 규칙: 반응형, 일반 접근성) ✅
 
 - **담당 시나리오**: 모든 시나리오 (cross-cutting). spec 불변 규칙 "반응형"·"성능" 마감.
 - **크기**: S (수정만, 새 파일 거의 없음)
