@@ -9,11 +9,12 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     globals: true,
     passWithNoTests: true,
-    exclude: [".claude/worktrees/**", "node_modules/**"],
+    exclude: [".claude/worktrees/**", "node_modules/**", "e2e/**"],
   },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "."),
+      "server-only": path.resolve(__dirname, "vitest.server-only-shim.ts"),
     },
   },
 });

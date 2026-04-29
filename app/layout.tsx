@@ -6,8 +6,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Kanban Todo",
-  description: "Kanban board application",
+  title: "URL to Markdown",
+  description: "웹 페이지 URL을 Markdown으로 변환합니다",
 };
 
 export default function RootLayout({
