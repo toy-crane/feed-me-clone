@@ -42,7 +42,10 @@ export function ResultView({ result, exportSlot, promptSlot }: ResultViewProps) 
             </p>
           ) : null}
           <p className="flex items-center gap-1 text-xs text-muted-foreground">
-            <ExternalLinkIcon className="size-3 shrink-0" />
+            <ExternalLinkIcon
+              aria-hidden="true"
+              className="size-3 shrink-0"
+            />
             <a
               href={result.sourceUrl}
               target="_blank"
