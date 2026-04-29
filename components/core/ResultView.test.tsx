@@ -66,6 +66,28 @@ describe("ResultView", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders promptSlot between the header and the markdown body in DOM order", () => {
+    render(
+      <ResultView
+        result={{
+          title: "Article",
+          sourceUrl: "https://example.com/x",
+          markdown: "## Section\n\nbody",
+        }}
+        promptSlot={<div data-testid="prompt-slot">PROMPT</div>}
+      />
+    );
+
+    const promptSlot = screen.getByTestId("prompt-slot");
+    const headerTitle = screen.getByRole("heading", { level: 1, name: "Article" });
+    const bodySection = screen.getByRole("heading", { level: 2, name: "Section" });
+
+    const order = headerTitle.compareDocumentPosition(promptSlot);
+    expect(order & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const bodyOrder = promptSlot.compareDocumentPosition(bodySection);
+    expect(bodyOrder & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("renders the markdown body via react-markdown (semantic h2/list/code)", () => {
     render(
       <ResultView
