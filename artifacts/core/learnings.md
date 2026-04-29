@@ -42,3 +42,24 @@ applied: not-yet
 **판단**: `vitest.config.ts`에 `resolve.alias["server-only"] → vitest.server-only-shim.ts`로 빈 모듈 alias. 테스트는 server-only 의도를 검증하지 않으므로 안전한 우회. 빌드/런타임에는 실제 패키지가 적용된다.
 **다시 마주칠 가능성**: 중간 — Next.js 프로젝트에서 server-only 코드를 vitest로 단위 테스트할 때 같은 함정. 신규 프로젝트 셋업 시 한 번 더 같은 alias가 필요.
 
+---
+category: tooling
+applied: not-yet
+---
+## JSX 문자열 prop의 `\n`은 escape가 아니라 백슬래시-n 리터럴
+
+**상황**: T5 ExportSplitButton 테스트에서 `<ExportSplitButton markdown="# Body\n\nLine" />` 가 실제로는 markdown prop을 `# Body\n\nLine` (백슬래시 + n) 12자로 전달. JS string과 다름. 1차 디버깅에서 vitest 디프 출력의 escape 차이 때문에 한참 헷갈림.
+**판단**: JSX에서 newline·tab 같은 escape를 쓰려면 `markdown={"# Body\n\nLine"}`로 expression brace를 써야 한다. 회피책 아닌 정정. learnings에 남겨 다음 테스트에서 다시 빠지지 않게.
+**다시 마주칠 가능성**: 높음 — JSX prop 값으로 multi-line 문자열을 자주 쓰는데, 단순 `"..."` 형태에 escape를 무심코 넣기 쉬움.
+
+---
+category: tooling
+applied: not-yet
+---
+## userEvent.setup() + 직접 조작한 navigator.clipboard 충돌
+
+**상황**: T5 ExportSplitButton 테스트에서 `userEvent.setup()`을 쓰면서 동시에 `Object.defineProperty(navigator, "clipboard", { value: { writeText } })`를 했더니 클릭이 writeText를 호출하지 않음. user-event v14가 자체 clipboard polyfill을 설치해 mock과 충돌.
+**판단**: 클립보드 mock이 필요한 테스트는 `fireEvent.click`을 쓰는 게 안전. user-event는 `setup({ writeToClipboard: false })` 옵션이 있지만 동작이 일관되지 않았다.
+**다시 마주칠 가능성**: 중간 — 다음에 클립보드 테스트할 때 같은 함정.
+
+
